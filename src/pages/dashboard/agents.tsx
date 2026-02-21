@@ -16,6 +16,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { PageHeader } from '@/components/shared/page-header'
+import { EmptyState } from '@/components/shared/empty-state'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import type { Agent, ModuleType } from '@/types'
@@ -126,7 +127,7 @@ function AgentsPage() {
         title="Agent Directory"
         description="Manage your AI agents across all modules"
         actions={
-          <Button variant="gradient" size="sm">
+          <Button variant="gradient" size="sm" aria-label="Create a new agent">
             <Plus className="mr-1.5 h-4 w-4" />
             Create Agent
           </Button>
@@ -147,6 +148,7 @@ function AgentsPage() {
           <select
             value={filterModule}
             onChange={(e) => setFilterModule(e.target.value)}
+            aria-label="Filter agents by module"
             className="h-10 rounded-lg border border-border bg-input px-3 text-sm text-foreground"
           >
             <option value="all">All Modules</option>
@@ -158,6 +160,7 @@ function AgentsPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
+            aria-label="Filter agents by status"
             className="h-10 rounded-lg border border-border bg-input px-3 text-sm text-foreground"
           >
             <option value="all">All Status</option>
@@ -168,70 +171,101 @@ function AgentsPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredAgents.map((agent) => (
-          <Card key={agent.id} className="group hover:shadow-card-hover hover:border-primary/20 transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className={cn('rounded-lg bg-muted p-2.5', moduleColors[agent.module])}>
-                    <Bot className="h-5 w-5" />
+      {filteredAgents.length === 0 ? (
+        <EmptyState
+          icon={<Bot className="h-6 w-6" />}
+          title={searchQuery || filterModule !== 'all' || filterStatus !== 'all'
+            ? 'No agents match your filters'
+            : 'No agents configured yet'}
+          description={
+            searchQuery || filterModule !== 'all' || filterStatus !== 'all'
+              ? 'Try adjusting your search query or filters to find the agent you\'re looking for.'
+              : 'Create your first AI agent to automate tasks across projects, content, finance, and health modules.'
+          }
+          actionLabel={searchQuery || filterModule !== 'all' || filterStatus !== 'all' ? 'Clear Filters' : 'Create Agent'}
+          onAction={() => {
+            if (searchQuery || filterModule !== 'all' || filterStatus !== 'all') {
+              setSearchQuery('')
+              setFilterModule('all')
+              setFilterStatus('all')
+            }
+          }}
+        />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredAgents.map((agent) => (
+            <Card key={agent.id} className="group hover:shadow-card-hover hover:border-primary/20 transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={cn('rounded-lg bg-muted p-2.5', moduleColors[agent.module])}>
+                      <Bot className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground">{agent.name}</h3>
+                      <p className="text-xs text-muted-foreground capitalize">{agent.module} · {agent.type}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground">{agent.name}</h3>
-                    <p className="text-xs text-muted-foreground capitalize">{agent.module} · {agent.type}</p>
+                  <StatusBadge status={agent.status} />
+                </div>
+
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Brain className="h-3.5 w-3.5" />
+                    <span>Memory: {agent.memoryScope}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Plug className="h-3.5 w-3.5" />
+                    <span>{agent.connectors.join(', ')}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Cpu className="h-3.5 w-3.5" />
+                    <span>{agent.runsTotal.toLocaleString()} total runs</span>
                   </div>
                 </div>
-                <StatusBadge status={agent.status} />
-              </div>
 
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Brain className="h-3.5 w-3.5" />
-                  <span>Memory: {agent.memoryScope}</span>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {agent.capabilities.map((cap) => (
+                    <Badge key={cap} variant="secondary" className="text-[10px]">{cap}</Badge>
+                  ))}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Plug className="h-3.5 w-3.5" />
-                  <span>{agent.connectors.join(', ')}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Cpu className="h-3.5 w-3.5" />
-                  <span>{agent.runsTotal.toLocaleString()} total runs</span>
-                </div>
-              </div>
 
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {agent.capabilities.map((cap) => (
-                  <Badge key={cap} variant="secondary" className="text-[10px]">{cap}</Badge>
-                ))}
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Success Rate</span>
-                  <span className="font-medium text-foreground">{agent.successRate}%</span>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Success Rate</span>
+                    <span className="font-medium text-foreground">{agent.successRate}%</span>
+                  </div>
+                  <Progress value={agent.successRate} />
                 </div>
-                <Progress value={agent.successRate} />
-              </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Last active: {agent.lastActive}</span>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground" title="View traces">
-                    <MessageSquare className="h-3.5 w-3.5" />
-                  </button>
-                  <button className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground" title="Clone">
-                    <Copy className="h-3.5 w-3.5" />
-                  </button>
-                  <button className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground" title="Archive">
-                    <Archive className="h-3.5 w-3.5" />
-                  </button>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Last active: {agent.lastActive}</span>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      aria-label={`View message traces for ${agent.name}`}
+                    >
+                      <MessageSquare className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      aria-label={`Clone ${agent.name}`}
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      aria-label={`Archive ${agent.name}`}
+                    >
+                      <Archive className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
