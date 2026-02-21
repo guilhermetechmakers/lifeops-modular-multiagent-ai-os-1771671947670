@@ -104,7 +104,10 @@ function FinanceModule() {
                 <YAxis stroke="#A1A1AA" fontSize={12} tickFormatter={(v) => `$${v / 1000}k`} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#232326', border: '1px solid #37373C', borderRadius: '8px', color: '#E5E7EB' }}
-                  formatter={(value: number | string | undefined) => [`$${Number(value ?? 0).toLocaleString()}`, '']}
+                  formatter={(value: string | number | (string | number)[]) => {
+                    const num = Array.isArray(value) ? Number(value[0]) : Number(value)
+                    return [`$${num.toLocaleString()}`, '']
+                  }}
                 />
                 <Line type="monotone" dataKey="income" stroke="#3FC56B" strokeWidth={2} dot={{ fill: '#3FC56B', r: 4 }} />
                 <Line type="monotone" dataKey="expenses" stroke="#FF7300" strokeWidth={2} dot={{ fill: '#FF7300', r: 4 }} />
@@ -127,7 +130,10 @@ function FinanceModule() {
                 </Pie>
                 <Tooltip
                   contentStyle={{ backgroundColor: '#232326', border: '1px solid #37373C', borderRadius: '8px', color: '#E5E7EB' }}
-                  formatter={(value: number | string | undefined) => [`$${Number(value ?? 0).toLocaleString()}`, '']}
+                  formatter={(value: string | number | (string | number)[]) => {
+                    const num = Array.isArray(value) ? Number(value[0]) : Number(value)
+                    return [`$${num.toLocaleString()}`, '']
+                  }}
                 />
               </RPieChart>
             </ResponsiveContainer>
