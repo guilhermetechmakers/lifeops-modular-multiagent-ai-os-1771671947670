@@ -9,6 +9,7 @@ import {
   Droplets,
   CheckCircle2,
   Circle,
+  Apple,
 } from 'lucide-react'
 import {
   RadarChart,
@@ -28,6 +29,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { MetricCard } from '@/components/shared/metric-card'
 import { PageHeader } from '@/components/shared/page-header'
+import { EmptyState } from '@/components/shared/empty-state'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
@@ -67,6 +69,12 @@ const trainingPlan = [
   { day: 'Friday', workout: 'HIIT Circuit', duration: '30 min', intensity: 'high', completed: false },
   { day: 'Saturday', workout: 'Long Run', duration: '75 min', intensity: 'medium', completed: false },
   { day: 'Sunday', workout: 'Active Recovery', duration: '30 min', intensity: 'low', completed: false },
+]
+
+const nutritionItems = [
+  { label: 'Calories', value: '2,350', target: '2,400', icon: <Flame className="h-5 w-5" />, progress: 98 },
+  { label: 'Protein', value: '145g', target: '160g', icon: <Dumbbell className="h-5 w-5" />, progress: 91 },
+  { label: 'Water', value: '2.1L', target: '3.0L', icon: <Droplets className="h-5 w-5" />, progress: 70 },
 ]
 
 const intensityColors: Record<string, string> = {
@@ -145,83 +153,109 @@ function HealthModule() {
         </TabsList>
 
         <TabsContent value="habits">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {habits.map((habit) => (
-              <Card key={habit.name} className={cn('transition-all duration-200', habit.completed && 'border-success/30')}>
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      {habit.completed ? (
-                        <CheckCircle2 className="h-5 w-5 text-success" />
-                      ) : (
-                        <Circle className="h-5 w-5 text-muted-foreground" />
-                      )}
-                      <h3 className="text-sm font-semibold text-foreground">{habit.name}</h3>
+          {habits.length === 0 ? (
+            <EmptyState
+              icon={<Target className="h-6 w-6" />}
+              title="No habits tracked yet"
+              description="Start building consistency by adding your first habit. AI agents can suggest habits based on your health goals and patterns."
+              actionLabel="Add Habit"
+              onAction={() => {}}
+            />
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {habits.map((habit) => (
+                <Card key={habit.name} className={cn('transition-all duration-200', habit.completed && 'border-success/30')}>
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        {habit.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-success" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-muted-foreground" />
+                        )}
+                        <h3 className="text-sm font-semibold text-foreground">{habit.name}</h3>
+                      </div>
+                      <Badge variant="secondary" className="text-[10px]">
+                        <Flame className="mr-1 h-3 w-3 text-primary" />
+                        {habit.streak}d
+                      </Badge>
                     </div>
-                    <Badge variant="secondary" className="text-[10px]">
-                      <Flame className="mr-1 h-3 w-3 text-primary" />
-                      {habit.streak}d
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-2">Target: {habit.target}</p>
-                  {habit.progress !== undefined && !habit.completed && (
-                    <Progress value={habit.progress} className="mt-2" />
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <p className="text-xs text-muted-foreground mb-2">Target: {habit.target}</p>
+                    {habit.progress !== undefined && !habit.completed && (
+                      <Progress value={habit.progress} className="mt-2" />
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="training">
-          <Card>
-            <CardContent className="p-0">
-              <div className="divide-y divide-border">
-                {trainingPlan.map((day) => (
-                  <div key={day.day} className={cn('flex items-center justify-between p-4 transition-colors', day.completed ? 'bg-success/5' : 'hover:bg-secondary/50')}>
-                    <div className="flex items-center gap-4">
-                      <div className="w-24">
-                        <p className="text-sm font-medium text-foreground">{day.day}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {day.completed ? (
-                          <CheckCircle2 className="h-4 w-4 text-success" />
-                        ) : (
-                          <Dumbbell className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <div>
-                          <p className="text-sm text-foreground">{day.workout}</p>
-                          <p className="text-xs text-muted-foreground">{day.duration}</p>
+          {trainingPlan.length === 0 ? (
+            <EmptyState
+              icon={<Dumbbell className="h-6 w-6" />}
+              title="No training plan created"
+              description="Generate a personalized training plan with AI agents based on your fitness goals, schedule, and recovery data."
+              actionLabel="Create Training Plan"
+              onAction={() => {}}
+            />
+          ) : (
+            <Card>
+              <CardContent className="p-0">
+                <div className="divide-y divide-border">
+                  {trainingPlan.map((day) => (
+                    <div key={day.day} className={cn('flex items-center justify-between p-4 transition-colors', day.completed ? 'bg-success/5' : 'hover:bg-secondary/50')}>
+                      <div className="flex items-center gap-4">
+                        <div className="w-24">
+                          <p className="text-sm font-medium text-foreground">{day.day}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {day.completed ? (
+                            <CheckCircle2 className="h-4 w-4 text-success" />
+                          ) : (
+                            <Dumbbell className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          <div>
+                            <p className="text-sm text-foreground">{day.workout}</p>
+                            <p className="text-xs text-muted-foreground">{day.duration}</p>
+                          </div>
                         </div>
                       </div>
+                      <span className={cn('text-xs font-medium capitalize', intensityColors[day.intensity])}>
+                        {day.intensity}
+                      </span>
                     </div>
-                    <span className={cn('text-xs font-medium capitalize', intensityColors[day.intensity])}>
-                      {day.intensity}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="nutrition">
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              { label: 'Calories', value: '2,350', target: '2,400', icon: <Flame className="h-5 w-5" />, progress: 98 },
-              { label: 'Protein', value: '145g', target: '160g', icon: <Dumbbell className="h-5 w-5" />, progress: 91 },
-              { label: 'Water', value: '2.1L', target: '3.0L', icon: <Droplets className="h-5 w-5" />, progress: 70 },
-            ].map((item) => (
-              <Card key={item.label}>
-                <CardContent className="p-6 text-center">
-                  <div className="mx-auto mb-3 rounded-lg bg-muted p-3 w-fit text-muted-foreground">{item.icon}</div>
-                  <p className="text-2xl font-bold text-foreground">{item.value}</p>
-                  <p className="text-xs text-muted-foreground mb-3">of {item.target} target</p>
-                  <Progress value={item.progress} />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {nutritionItems.length === 0 ? (
+            <EmptyState
+              icon={<Apple className="h-6 w-6" />}
+              title="No nutrition data available"
+              description="Connect a nutrition tracker or manually log your meals to get AI-powered insights on your diet and hydration."
+              actionLabel="Log Nutrition"
+              onAction={() => {}}
+            />
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-3">
+              {nutritionItems.map((item) => (
+                <Card key={item.label}>
+                  <CardContent className="p-6 text-center">
+                    <div className="mx-auto mb-3 rounded-lg bg-muted p-3 w-fit text-muted-foreground">{item.icon}</div>
+                    <p className="text-2xl font-bold text-foreground">{item.value}</p>
+                    <p className="text-xs text-muted-foreground mb-3">of {item.target} target</p>
+                    <Progress value={item.progress} />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
