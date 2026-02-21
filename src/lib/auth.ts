@@ -5,11 +5,6 @@ const AUTH_TOKEN_KEY = 'auth_token'
 const REFRESH_TOKEN_KEY = 'auth_refresh_token'
 const REMEMBER_ME_KEY = 'auth_remember_me'
 
-function getStorage(): Storage {
-  const rememberMe = localStorage.getItem(REMEMBER_ME_KEY) === 'true'
-  return rememberMe ? localStorage : sessionStorage
-}
-
 export function setAuthTokens(token: string, refreshToken: string, rememberMe: boolean) {
   localStorage.setItem(REMEMBER_ME_KEY, String(rememberMe))
   const storage = rememberMe ? localStorage : sessionStorage
