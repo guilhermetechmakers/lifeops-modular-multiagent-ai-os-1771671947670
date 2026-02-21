@@ -88,7 +88,7 @@
   }
 
   .bg-gradient-primary {
-    @apply bg-gradient-to-r from-[#FF7300] to-[#FF9A3E];
+    @apply bg-gradient-to-r from-primary to-primary/70;
   }
 
   .bg-gradient-accent {
